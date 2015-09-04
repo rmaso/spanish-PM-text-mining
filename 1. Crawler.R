@@ -6,7 +6,7 @@
 # Data Used:       Downloaded data from:
 #                       * http://www.lamoncloa.gob.es/presidente/intervenciones/Paginas/index.aspx
 # Packages Used:   bitops, RCurl, stringr, XML
-# Output File:     RawData.Rdata
+# Output File:     CleanData.Rdata
 # Data Output:     Dataframe containing all the speeches of the Spanish Prime Minister from 2004 to 2015
 
 # Copyright (c) 2011, under the Simplified BSD License.  
@@ -142,5 +142,26 @@ for(d in seq(as.Date('2004-04-01'), as.Date('2015-07-01'), by='month')){
   } # Fin while de existencia de nuevas paginas para el mes 
 } # Fin for para los meses 
 
+# Debido a los diferentes formatos utilizados en la página web de Gobierno de España, se debe realizar
+# una limpieza de caracteres mal codificados por los correctos
+limpiar.texto <- function(input){
+  library(gsubfn)
+  unwanted_array = list( 'Ã¡' = 'á', 'Ã©' = 'é', 'Ã'='í', 'Ã³' = 'ó', 'Ãº'='ú', 'Ã±'='ñ'  )
 
-save(DATA, file = "RawData.Rdata")
+
+  sapply(input, function(x) gsubfn(paste(names(unwanted_array),collapse='|'), unwanted_array,as.character(x)))
+}
+
+# Preparar el dataframe para su posterior importación al Corpus de la libreria tm
+data.clean<-data.frame(datetimestamp=as.Date(as.character(DATA$date),format="%d/%m/%Y"),
+                       title = limpiar.texto(DATA$title), 
+                       place = limpiar.texto(DATA$place),
+                       summary = limpiar.texto(DATA$summary),
+                       link = DATA$link,
+                       contents = limpiar.texto(DATA$content),
+                       authors = ifelse(as.Date(as.character(DATA$date),format="%d/%m/%Y") >= "2011-12-11", "Mariano Rajoy Brey", "Jose Luis Rodriguez Zapatero"),
+                       languages = rep("es", length(DATA$content)),
+                       stringsAsFactors=FALSE)
+
+# Guardar dataframe preparado para tm
+save(data.clean, file="CleanData.Rdata")
