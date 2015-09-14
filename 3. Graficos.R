@@ -18,12 +18,16 @@
 
 ##########################################################################################
 
+library(ggplot2)
+library(RColorBrewer)
+library(wordcloud)
+
 ######
 # Set working directory and load data
 ######
 
-setwd('./Documents/TextMining/PresidenteGobierno/')
-load('CleanData.Rdata')
+setwd('~/Documents/TextMining/spanish-PM-text-mining/')
+load('./data/CleanData.Rdata')
 
 
 ##########################################################################################
@@ -34,15 +38,12 @@ data.clean <- within(data.clean,
                    place <- factor(place, levels=names(sort(table(place), decreasing=TRUE))))
 
 
-ggplot(data.clean,aes(x=place))+
-	geom_bar(binwidth=1)+
-	scale_x_discrete(limits=head(names(sort(table(data.clean$place), decreasing=TRUE)),20)) +
-	theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-
-
-
-
+png(filename="./graphics/barplot_place.png")
+  ggplot(data.clean,aes(x=place))+
+  	geom_bar(binwidth=1)+
+  	scale_x_discrete(limits=head(names(sort(table(data.clean$place), decreasing=TRUE)),20)) +
+  	theme(axis.text.x = element_text(angle = 90, hjust = 1))
+dev.off()
 
 ##########################################################################################
 #                                 Gráficos con bigrams                                   #
@@ -52,8 +53,6 @@ ggplot(data.clean,aes(x=place))+
 BigramTokenizer <-
   function(x)
     unlist(lapply(ngrams(words(x), 2), paste, collapse = " "), use.names = FALSE)
-
-
 
 b.freq <- list()
 for(i in unique(format(as.Date(unlist(meta(docs, "datetimestamp"))), "%Y"))){
@@ -85,11 +84,13 @@ for(idtm in names(b.freq) ){
   freq <- freq[!names(freq) %in% stop.words]
   dark2 <- brewer.pal(6, "Dark2")  
   
-  layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
-  par(mar=rep(0, 4))
-  plot.new()
-  text(x=0.5, y=0.5, paste("Año", idtm))
-  wordcloud(names(freq), freq, max.words=20, rot.per=0.1, colors=dark2, random.order=FALSE)   
+  png(filename=paste("./graphics/wordcloud_bigrams_", idtm, ".png", sep=""))
+    layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+    par(mar=rep(0, 4))
+    plot.new()
+    text(x=0.5, y=0.5, paste("Año", idtm))
+    wordcloud(names(freq), freq, max.words=20, rot.per=0.1, colors=dark2, random.order=FALSE)   
+  dev.off()
 }
 
 
@@ -100,12 +101,14 @@ for(idtm in names(b.freq) ){
   d <- as.dist(d[!colnames(d) %in% stop.words, !colnames(d) %in% stop.words])
   fit <- hclust(d=d, method="ward")  
 
-  layout(matrix(c(1, 2), nrow=2), heights=c(1, 5))
-  par(mar=rep(0, 4))
-  plot.new()
-  text(x=0.5, y=0.5, paste("Año", idtm))
-  plot(fit, hang=-1, main="")
-  groups <- cutree(fit, k=5)   # "k=" defines the number of clusters you are using  
-  rect.hclust(fit, k=5, border="red") # draw dendogram with red borders around the 5 clusters  
+  png(filename=paste("./graphics/cluster_bigrams_", idtm, ".png", sep=""))
+    layout(matrix(c(1, 2), nrow=2), heights=c(1, 5))
+    par(mar=rep(0, 4))
+    plot.new()
+    text(x=0.5, y=0.5, paste("Año", idtm))
+    plot(fit, hang=-1, main="")
+    groups <- cutree(fit, k=5)   # "k=" defines the number of clusters you are using  
+    rect.hclust(fit, k=5, border="red") # draw dendogram with red borders around the 5 clusters  
+  dev.off()
 }
 

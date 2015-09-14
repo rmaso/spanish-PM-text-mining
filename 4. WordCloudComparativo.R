@@ -20,10 +20,10 @@ library(tm)
 library(ggplot2)
 
 # Set working directory
-setwd('./Documents/TextMining/PresidenteGobierno/')
+setwd('~/Documents/TextMining/spanish-PM-text-mining/')
 
 ### Step 1: Load in text data, clean, and analyze overlapping terms
-load("Corpus.Rdata")
+load("./data/Corpus.Rdata")
 idxZapatero <- unlist(meta(docs, "author")) == "Jose Luis Rodriguez Zapatero"
 idxRajoy <- unlist(meta(docs, "author")) == "Mariano Rajoy Brey"
 
@@ -67,7 +67,7 @@ zapatero.df <- transform(zapatero.df, freq.dif = round((freq.dif - min(freq.dif)
 rajoy.df <- head(rajoy.df[ order(-rajoy.df[,2]), ], 50)
 rajoy.df <- transform(rajoy.df, freq.dif = round((freq.dif + min(abs(freq.dif)))/(2*max(abs(freq.dif))), 1)-0.1 )
 
-equal.df <- head(equal.df[ order(-equal.df[,1]-equal.df[,2]), ], 10)
+equal.df <- head(equal.df[ order(-equal.df[,1]-equal.df[,2]), ], 20)
 
 
 
@@ -112,12 +112,14 @@ rajoy.df<-transform(rajoy.df, Spacing=rajoy.optim)
 equal.df$Spacing<-as.vector(equal.spacing)
 
 ### Step 3: Create visualization
-tucson.cloud <- ggplot(zapatero.df, aes(x=freq.dif, y=Spacing))+geom_text(aes(size=zapatero, label=row.names(zapatero.df), colour=freq.dif))+
+comp.cloud <- ggplot(zapatero.df, aes(x=freq.dif, y=Spacing))+geom_text(aes(size=zapatero, label=row.names(zapatero.df), colour=freq.dif))+
   geom_text(data=rajoy.df, aes(x=freq.dif, y=Spacing, label=row.names(rajoy.df), size=rajoy, color=freq.dif))+
   geom_text(data=equal.df, aes(x=freq.dif, y=Spacing, label=row.names(equal.df), size=zapatero, color=freq.dif))+
   scale_size(range=c(3,11), name="Frecuencia")+scale_colour_gradient(low="darkred", high="darkblue", guide="none")+
   scale_x_continuous(breaks=c(min(rajoy.df$freq.dif),0,max(zapatero.df$freq.dif)),labels=c("Más dichas por Rajoy","Dichas igualitariamente","Más dichas por Zapatero"))+
-  scale_y_continuous(breaks=c(0),labels=c(""))+xlab("")+ylab("")+theme_bw()+
-  theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), title=element_text("Word Cloud 2.0, Discursos del Presidente del Gobierno (Rajoy vs. Zapatero)"))
-tucson.cloud
-ggsave(plot=tucson.cloud,filename="WordCloudComparativo.png",width=13,height=7)
+  scale_y_continuous(breaks=c(0),labels=c(""))+xlab("")+ylab("")+
+#   theme_bw()+
+  labs(title="Comparativa Discursos Rajoy vs Zapatero")
+comp.cloud
+
+ggsave(plot=comp.cloud,filename="./graphics/wordcloud_comparativo_Zapatero_Rajoy.png",width=13,height=7)

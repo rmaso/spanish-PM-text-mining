@@ -18,11 +18,12 @@
 # Load libraries
 library(bitops)
 library(RCurl)
+library(httr)
 library(stringr)
 library(XML)
 
 # Set working directory
-setwd('./Documents/TextMining/PresidenteGobierno/')
+setwd('~/Documents/TextMining/spanish-PM-text-mining/')
 
 # returns string w/o leading or trailing whitespace
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
@@ -53,7 +54,7 @@ cHandle2<- getCurlHandle(
 # La página web del gobierno http://www.lamoncloa.gob.es/presidente/intervenciones/Paginas/index.aspx
 # permite el filtrado de las comparecencias del presidente del gobierno filtradas por mes
 # Recorremos los diferentes meses desde el principio 04/2004 al último mes disponible 07/2015
-for(d in seq(as.Date('2004-04-01'), as.Date('2015-07-01'), by='month')){
+for(d in seq(as.Date('2004-04-01'), as.Date('2015-08-01'), by='month')){
   cat(paste('Procesando ', format(as.Date(d, origin="1970-01-01"), "%m/%Y"), '\n', sep=''))
   
   # Construcción de la URL para el Año/Mes. Devuelve el listado de comparecencias del Presidente
@@ -164,4 +165,4 @@ data.clean<-data.frame(datetimestamp=as.Date(as.character(DATA$date),format="%d/
                        stringsAsFactors=FALSE)
 
 # Guardar dataframe preparado para tm
-save(data.clean, file="CleanData.Rdata")
+save(data.clean, file="./data/CleanData.Rdata")

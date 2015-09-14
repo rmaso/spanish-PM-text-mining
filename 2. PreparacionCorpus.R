@@ -37,8 +37,8 @@
 # Set working directory and load data
 ######
 
-setwd('./Documents/TextMining/PresidenteGobierno/')
-load('CleanData.Rdata')
+setwd('~/Documents/TextMining/spanish-PM-text-mining/')
+load('./data/CleanData.Rdata')
 
 
 ##########################################################################################
@@ -66,17 +66,16 @@ library(SnowballC)
 docs.original <- docs
 docs <- tm_map(docs, stemDocument, language="es")   # *Removing common word endings* (e.g., "ing", "es")  
 
-stemCompletion_mod <- function(x,dict=corpuscopy) {
-  PlainTextDocument(stripWhitespace(paste(stemCompletion(unlist(strsplit(as.character(x)," ")),dictionary=dict, type="shortest"),sep="", collapse=" ")))
-}
-
-docs <- lapply(docs, stemCompletion_mod, dict=docs.original)
+# stemCompletion_mod <- function(x,dict=corpuscopy) {
+#   PlainTextDocument(stripWhitespace(paste(stemCompletion(unlist(strsplit(as.character(x)," ")),dictionary=dict, type="shortest"),sep="", collapse=" ")))
+# }
+# 
+# docs <- lapply(docs, stemCompletion_mod, dict=docs.original)
 
 #docs <- tm_map(docs, stemCompletion, dictionary=docs.original, type="prevalent")
 docs <- tm_map(docs, stripWhitespace)   # *Stripping whitespace  
 
-save(docs, docs.original, file="Corpus.Rdata")
-# docs <- tm_map(docs, PlainTextDocument)  
+save(docs, docs.original, file="./data/Corpus.Rdata")
 ## *This is the end of the preprocessing stage.*  
 
 
